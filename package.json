@@ -12,5 +12,7 @@
   },
   "scripts": {
     "prepublishOnly": "tsc"
-  }
+  },
+  "repository": "github:troIIsmile/core",
+  "bugs": "https://github.com/troIIsmile/core"
 }
