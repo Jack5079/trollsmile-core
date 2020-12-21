@@ -1,7 +1,7 @@
 {
   "name": "trollsmile-core",
   "main": "index.js",
-  "description": "jackbot-discord but awesome",
+  "description": "jackbot-discord but slightly better",
   "author": "Jack <hello@5079.ml> (https://5079.ml)",
   "license": "ISC",
   "types": "index.d.ts",
