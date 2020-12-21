@@ -1,27 +1,28 @@
-abstract class Bot<Custom> {
+export default abstract class Bot<MesssageType> {
   private events = new Map<string, Set<(arg: any) => void>>()
-  on (type: 'output', handler: (ev: [any, Custom]) => void): void
-  on (type: 'error', handler: (ev: [any, Custom]) => void): void
-  on (type: 'message', handler: (ev: Custom) => void): void
+  on (type: 'output', handler: (ev: [any, MesssageType]) => void): void
+  on (type: 'error', handler: (ev: [any, MesssageType]) => void): void
+  on (type: 'message', handler: (ev: MesssageType) => void): void
   on (type: string, handler: (arg: any) => void): void {
     if (!this.events.has(type)) this.events.set(type, new Set)
-    this.events.get(type).add(handler)
+    this.events.get(type)?.add(handler)
   }
   emit (name: string, event: any) {
     if (!this.events.has(name)) this.events.set(name, new Set)
-    for (const func of this.events.get(name)) func(event)
+    for (const func of (this.events.get(name) || [])) func(event)
   }
   off (type: string, callback: (arg: any) => void) {
-    this.events.get(type).delete(callback)
+    this.events.get(type)?.delete(callback)
   }
   commands = new Map<string, {
-    run (this: Bot<Custom>, message: Custom, args: string[]): any
+    run (this: Bot<MesssageType>, message: MesssageType, args: string[]): any
   }>()
   aliases = new Map<string, string>()
-  filter: (msg: Custom) => boolean = () => true
+  filter: (msg: MesssageType) => boolean = () => true
   constructor(public prefix: string) {
-    this.on('message', async (message: Custom) => {
-      const content = message.toString()
+    this.on('message', async (message: MesssageType) => {
+      if (!('toString' in message)) return
+      const content = message + ''
       if (!this.filter(message)) return
 
       const name = this.commandFromMessage(content, prefix)
@@ -68,5 +69,4 @@ abstract class Bot<Custom> {
       .substring(prefix.length + 1 + name.length) // only the part after the command
       .split(' ') // split with spaces
   }
-
 }
