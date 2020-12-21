@@ -21,8 +21,7 @@ export default abstract class Bot<MesssageType> {
   filter: (msg: MesssageType) => boolean = () => true
   constructor(public prefix: string) {
     this.on('message', async (message: MesssageType) => {
-      if (!('toString' in message)) return
-      const content = message + ''
+      const content = (message as { content?: string }).content || message + ''
       if (!this.filter(message)) return
 
       const name = this.commandFromMessage(content, prefix)
