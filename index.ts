@@ -1,4 +1,6 @@
-export default abstract class Bot<MesssageType> {
+export default abstract class Bot<MesssageType = { content: string }, CommandObj extends { run: (...args: any[]) => any } = {
+  run (this: Bot<MesssageType>, message: MesssageType, args: string[]): any
+}> {
   private events = new Map<string, Set<(arg: any) => void>>()
   on (type: 'output', handler: (ev: [any, MesssageType]) => void): void
   on (type: 'error', handler: (ev: [any, MesssageType]) => void): void
@@ -14,9 +16,7 @@ export default abstract class Bot<MesssageType> {
   off (type: string, callback: (arg: any) => void) {
     this.events.get(type)?.delete(callback)
   }
-  commands = new Map<string, {
-    run (this: Bot<MesssageType>, message: MesssageType, args: string[]): any
-  }>()
+  commands = new Map<string, CommandObj>()
   aliases = new Map<string, string>()
   filter: (msg: MesssageType) => boolean = () => true
   constructor(public prefix: string) {
