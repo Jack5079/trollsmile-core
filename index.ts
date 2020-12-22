@@ -1,4 +1,4 @@
-export default abstract class Bot<MesssageType = { content: string }, CommandObj extends { run: (...args: any[]) => any } = {
+export default abstract class Bot<MesssageType = { content: string }, CommandObj extends { run (this: Bot<MesssageType>, message: MesssageType, args: string[]): any } = {
   run (this: Bot<MesssageType>, message: MesssageType, args: string[]): any
 }> {
   private events = new Map<string, Set<(arg: any) => void>>()
