@@ -18,7 +18,8 @@ export default abstract class Bot<MesssageType = { content: string }, CommandObj
   }
   commands = new Map<string, CommandObj>()
   aliases = new Map<string, string>()
-  filter: (msg: MesssageType) => boolean = () => true
+  abstract filter (msg: MesssageType): boolean
+  
   constructor(public prefix: string) {
     this.on('message', async (message: MesssageType) => {
       const content = (message as { content?: string }).content || message + ''
