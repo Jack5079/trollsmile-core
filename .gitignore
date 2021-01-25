@@ -110,6 +110,7 @@ dist
 
 # Output JS
 index.js
+tests/*.js
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

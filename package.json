@@ -12,8 +12,9 @@
     "typescript": "^4.1.3"
   },
   "scripts": {
-    "prepublishOnly": "tsc"
+    "prepublishOnly": "tsc",
+    "test": "node tests/handler"
   },
   "repository": "github:troIIsmile/core",
-  "bugs": "https://github.com/troIIsmile/core"
+  "bugs": "https://github.com/troIIsmile/core/issues"
 }

@@ -1,31 +1,37 @@
-export default abstract class Bot<MesssageType = { content: string }, CommandObj extends { run (this: Bot<MesssageType>, message: MesssageType, args: string[]): any } = {
+type DefaultCommand<MesssageType = DefaultMessage> = {
   run (this: Bot<MesssageType>, message: MesssageType, args: string[]): any
-}> {
-  private events = new Map<string, Set<(arg: any) => void>>()
-  on (type: 'output', handler: (ev: [any, MesssageType]) => void): void
-  on (type: 'error', handler: (ev: [any, MesssageType]) => void): void
-  on (type: 'message', handler: (ev: MesssageType) => void): void
-  on (type: string, handler: (arg: any) => void): void {
+}
+type DefaultMessage = {
+  content: string
+}
+interface Events<MessageType> {
+  output: [any, MessageType]
+  error: [any, MessageType]
+  message: MessageType
+}
+abstract class Bot<MesssageType = DefaultMessage, CommandObj extends DefaultCommand<MesssageType> = DefaultCommand<MesssageType>> {
+  protected events = new Map<string, Set<(arg: any) => void>>()
+  on<Key extends keyof Events<MesssageType>> (type: Key, handler: (arg: Events<MesssageType>[Key]) => void): void {
     if (!this.events.has(type)) this.events.set(type, new Set)
     this.events.get(type)?.add(handler)
   }
-  emit (name: string, event: any) {
+  emit<Key extends keyof Events<MesssageType>> (name: Key, event: Events<MesssageType>[Key]) {
     if (!this.events.has(name)) this.events.set(name, new Set)
     for (const func of (this.events.get(name) || [])) func(event)
   }
-  off (type: string, callback: (arg: any) => void) {
+  off (type: keyof Events<MesssageType>, callback: (arg: any) => void) {
     this.events.get(type)?.delete(callback)
   }
   commands = new Map<string, CommandObj>()
   aliases = new Map<string, string>()
   abstract filter (msg: MesssageType): boolean
-  
+
   constructor(public prefix: string) {
     this.on('message', async (message: MesssageType) => {
       const content = (message as { content?: string }).content || message + ''
       if (!this.filter(message)) return
 
-      const name = this.commandFromMessage(content, prefix)
+      const name = this.commandFromMessage(content)
 
       if (!name) return
 
@@ -35,7 +41,7 @@ export default abstract class Bot<MesssageType = { content: string }, CommandObj
         const output = await command.call(
           this,
           message,
-          this.getargs(content, prefix)
+          this.getArguments(content)
         )
 
         if (output) this.emit('output', [output, message])
@@ -45,28 +51,32 @@ export default abstract class Bot<MesssageType = { content: string }, CommandObj
     })
   }
 
-  protected getCommandName (cmdname: string): string | undefined {
+  getCommandName (cmdname: string): string | undefined {
     return this.commands.has(cmdname) ? cmdname : this.aliases.get(cmdname)
   }
 
-  protected getCommand (name: string | undefined) {
+  getCommand (name: string | undefined) {
     if (!name) return undefined
-    return this.commands.get(this.getCommandName(name || '') || '')
+    if (this.commands.has(name) || this.aliases.has(name)) {
+      return this.commands.get(this.getCommandName(name!)!)
+    } else return
   }
 
-  protected commandFromMessage (content: string, prefix: string): string | undefined {
+  commandFromMessage (content: string): string | undefined {
     return [...this.commands.keys(), ...this.aliases.keys()].find(
       cmdname =>
-        content.startsWith(`${prefix}${cmdname} `) || // matches any command with a space after
-        content === `${prefix}${cmdname}` // matches any command without arguments
+        content.startsWith(`${this.prefix}${cmdname} `) || // matches any command with a space after
+        content === `${this.prefix}${cmdname}` // matches any command without arguments
     )
   }
 
-  protected getargs (content: string, prefix: string) {
-    const name = this.commandFromMessage(content, prefix)
+  getArguments (content: string) {
+    const name = this.commandFromMessage(content)
     if (!name) return []
     return content
-      .substring(prefix.length + 1 + name.length) // only the part after the command
+      .substring(this.prefix.length + 1 + name.length) // only the part after the command
       .split(' ') // split with spaces
   }
 }
+
+export default Bot
