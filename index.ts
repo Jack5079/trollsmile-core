@@ -17,7 +17,7 @@ abstract class Bot<MesssageType = DefaultMessage, CommandObj extends DefaultComm
   }
   emit<Key extends keyof Events<MesssageType>> (name: Key, event: Events<MesssageType>[Key]) {
     if (!this.events.has(name)) this.events.set(name, new Set)
-    for (const func of (this.events.get(name) || [])) func(event)
+    for (const func of this.events.get(name)!) func(event)
   }
   off (type: keyof Events<MesssageType>, callback: (arg: any) => void) {
     this.events.get(type)?.delete(callback)
