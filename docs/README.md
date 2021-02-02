@@ -1,6 +1,6 @@
 # trollsmile-core
 
-The command parser used in trollsmile-djs and trollsmile-web.
+The command parser used in trollsmile-djs, trollsmile-cli, and trollsmile-web.
 
 `npm i trollsmile-core`
 
