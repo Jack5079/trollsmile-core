@@ -1,4 +1,4 @@
-import Trollsmile from '..'
+import Trollsmile from '../index.js'
 let willRun: string[] = []
 class Bot extends Trollsmile<string> {
   filter () {
